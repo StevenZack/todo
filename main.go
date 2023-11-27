@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
 	"log"
@@ -28,6 +29,8 @@ const (
 )
 
 var (
+	//go:embed views
+	fs          embed.FS
 	todos       = []Todo{}
 	users       = []User{}
 	modifiedTag = strconv.FormatInt(time.Now().Unix(), 10)
@@ -39,7 +42,7 @@ func init() {
 }
 
 func main() {
-	t, e := template.ParseGlob("views/*.html")
+	t, e := template.ParseFS(fs, "views/*.html")
 	if e != nil {
 		log.Println(e)
 		return
