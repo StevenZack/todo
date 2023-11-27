@@ -71,7 +71,8 @@
             Total Count: {{.Total}}
             <form action="/">
                 <a href="/?page={{.Last}}">Previous</a>
-                <input type="number" name="page" value="{{.Page}}"> /
+                <a href="/">Home</a>
+                <input type="number" name="page" style="max-width: 30px;" value="{{.Page}}"> /
                 {{.TotalPage}}
                 <input type="submit" value="submit">
                 <a href="/?page={{.Next}}">Next</a>
