@@ -58,7 +58,6 @@ func main() {
 				Name:      r.FormValue("name"),
 				CreatedAt: time.Now().Format(time.RFC3339),
 			})
-			http.Redirect(w, r, "/"+pageStr, http.StatusFound)
 		case http.MethodDelete:
 			var out []Todo
 			id := r.FormValue("id")
@@ -113,6 +112,7 @@ func main() {
 			return
 		}
 		modifiedTag = strconv.FormatInt(time.Now().Unix(), 10)
+		time.Sleep(time.Second)
 	})
 	println("started at http://localhost:8080")
 	e = http.ListenAndServe(":8080", nil)
