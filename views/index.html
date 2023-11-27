@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://supermind.cool/css/app.css">
     <title>Todos</title>
+    <script src="htmx.js" defer></script>
 </head>
 
 <body>
@@ -13,10 +14,9 @@
         <div class="w maxwsm">
             <h1>Todos</h1>
             <hr>
-            <form action="/">
+            <form action="/" method="post">
                 <input type="hidden" name="method" value="post">
                 <input type="text" name="name" placeholder="name">
-                <input type="hidden" name="page" value="{{.Page}}">
                 <input type="submit" value="ADD">
             </form>
             <hr>
@@ -46,10 +46,8 @@
                     <td>
                         <details>
                             <summary>Update</summary>
-                            <form action="/">
-                                <input type="hidden" name="method" value="patch">
+                            <form action="/" method="patch">
                                 <input type="hidden" name="id" value="{{.Id}}">
-                                <input type="hidden" name="page" value="{{$.Page}}">
                                 <div>
                                     <input type="text" name="name" value="{{.Name}}" placeholder="name">
                                 </div>
@@ -61,7 +59,7 @@
                         </details>
                     </td>
                     <td>
-                        <a href="/?method=delete&id={{.Id}}">Delete</a>
+                        <button href-delete="/?id={{.Id}}">Delete</button>
                     </td>
                 </tr>
                 {{end}}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"html/template"
 	"log"
 	"net/http"
@@ -20,8 +19,6 @@ const (
 	PageSize = 2
 )
 
-//go:embed views
-var fs embed.FS
 var (
 	todos       = []Todo{}
 	modifiedTag = strconv.FormatInt(time.Now().Unix(), 10)
@@ -33,13 +30,15 @@ func init() {
 }
 
 func main() {
-	t, e := template.ParseFS(fs, "views/*.html")
+	t, e := template.ParseGlob("views/*.html")
 	if e != nil {
 		log.Println(e)
 		return
 	}
+	http.HandleFunc("/htmx.js", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "views/htmx.js")
+	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-
 		var page = 0
 		pageStr := r.FormValue("page")
 		if pageStr != "" {
@@ -51,15 +50,16 @@ func main() {
 			}
 		}
 
-		switch r.FormValue("method") {
-		case "post":
+		switch r.Method {
+		case http.MethodPost:
 			idCounter++
 			todos = append(todos, Todo{
 				Id:        strconv.Itoa(idCounter),
 				Name:      r.FormValue("name"),
 				CreatedAt: time.Now().Format(time.RFC3339),
 			})
-		case "delete":
+			http.Redirect(w, r, "/"+pageStr, http.StatusFound)
+		case http.MethodDelete:
 			var out []Todo
 			id := r.FormValue("id")
 			for _, v := range todos {
@@ -69,7 +69,7 @@ func main() {
 				out = append(out, v)
 			}
 			todos = out
-		case "patch":
+		case http.MethodPatch:
 			id := r.FormValue("id")
 			name := r.FormValue("name")
 			age := r.FormValue("age")
@@ -112,9 +112,7 @@ func main() {
 			}
 			return
 		}
-
 		modifiedTag = strconv.FormatInt(time.Now().Unix(), 10)
-		http.Redirect(w, r, "/?page="+pageStr, http.StatusFound)
 	})
 	println("started at http://localhost:8080")
 	e = http.ListenAndServe(":8080", nil)
@@ -122,5 +120,4 @@ func main() {
 		log.Panic(e)
 		return
 	}
-
 }
