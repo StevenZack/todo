@@ -1,0 +1,10 @@
+<nav class="p">
+    <a href="/">Home</a> |
+    {{if ne . ""}}
+    {{.}}
+    <button onclick="location.pathname='/login'">Logout</button>
+    {{else}}
+    <a href="/login">Login</a>
+    {{end}}
+</nav>
+<hr>

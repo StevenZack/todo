@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -8,12 +9,19 @@ import (
 	"time"
 )
 
-type Todo struct {
-	Id        string
-	Name      string
-	Age       int
-	CreatedAt string
-}
+type (
+	Todo struct {
+		Id        string
+		Name      string
+		Age       int
+		CreatedAt string
+	}
+	User struct {
+		Email     string
+		Password  string
+		SessionId string
+	}
+)
 
 const (
 	PageSize = 2
@@ -21,6 +29,7 @@ const (
 
 var (
 	todos       = []Todo{}
+	users       = []User{}
 	modifiedTag = strconv.FormatInt(time.Now().Unix(), 10)
 	idCounter   = 0
 )
@@ -35,10 +44,100 @@ func main() {
 		log.Println(e)
 		return
 	}
-	http.HandleFunc("/htmx.js", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "views/htmx.js")
+
+	http.HandleFunc("/nav", func(w http.ResponseWriter, r *http.Request) {
+		var username string
+		if sessionId, e := r.Cookie("at"); e == nil {
+			for _, v := range users {
+				if v.SessionId == sessionId.Value {
+					username = v.Email
+					break
+				}
+			}
+		}
+
+		t.ExecuteTemplate(w, "nav.html", username)
+	})
+	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			email := r.FormValue("email")
+			password := r.FormValue("password")
+			if email == "" {
+				http.Error(w, "invalid email", 400)
+				return
+			}
+			if password == "" {
+				http.Error(w, "invalid password", 400)
+				return
+			}
+			for _, v := range users {
+				if v.Email == email {
+					http.Error(w, "account exists", 400)
+					return
+				}
+			}
+			v := User{
+				Email:     email,
+				Password:  password,
+				SessionId: strconv.FormatInt(time.Now().Unix(), 10),
+			}
+			users = append(users, v)
+			http.SetCookie(w, &http.Cookie{
+				Name:     "at",
+				Value:    v.SessionId,
+				HttpOnly: true,
+			})
+			fmt.Fprint(w, "/")
+			return
+		}
+		t.ExecuteTemplate(w, "register.html", nil)
+	})
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			email := r.FormValue("email")
+			password := r.FormValue("password")
+			if email == "" {
+				http.Error(w, "invalid email", 400)
+				return
+			}
+			if password == "" {
+				http.Error(w, "invalid password", 400)
+				return
+			}
+			for i, v := range users {
+				if v.Email == email {
+					if v.Password != password {
+						http.Error(w, "password incorrect", 400)
+						return
+					}
+					v.SessionId = strconv.FormatInt(time.Now().Unix(), 10)
+					users[i] = v
+					http.SetCookie(w, &http.Cookie{
+						Name:     "at",
+						Value:    v.SessionId,
+						HttpOnly: true,
+					})
+					fmt.Fprint(w, "/")
+					return
+				}
+			}
+			http.Error(w, "account not found", 400)
+			return
+		}
+		http.SetCookie(w, &http.Cookie{
+			Name:    "at",
+			Expires: time.Now(),
+			MaxAge:  -1,
+		})
+		t.ExecuteTemplate(w, "login.html", nil)
 	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
 		var page = 0
 		pageStr := r.FormValue("page")
 		if pageStr != "" {
@@ -112,7 +211,6 @@ func main() {
 			return
 		}
 		modifiedTag = strconv.FormatInt(time.Now().Unix(), 10)
-		time.Sleep(time.Second)
 	})
 	println("started at http://localhost:8080")
 	e = http.ListenAndServe(":8080", nil)
