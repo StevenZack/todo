@@ -16,11 +16,15 @@ type Todo struct {
 	CreatedAt string
 }
 
+const (
+	PageSize = 2
+)
+
 //go:embed views
 var fs embed.FS
 var (
 	todos       = []Todo{}
-	modifiedTag = "-"
+	modifiedTag = strconv.FormatInt(time.Now().Unix(), 10)
 	idCounter   = 0
 )
 
@@ -35,6 +39,18 @@ func main() {
 		return
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
+		var page = 0
+		pageStr := r.FormValue("page")
+		if pageStr != "" {
+			var e error
+			page, e = strconv.Atoi(pageStr)
+			if e != nil {
+				http.Error(w, "invalid page", http.StatusBadRequest)
+				return
+			}
+		}
+
 		switch r.FormValue("method") {
 		case "post":
 			idCounter++
@@ -76,7 +92,21 @@ func main() {
 				return
 			}
 
-			e = t.ExecuteTemplate(w, "index.html", todos)
+			var out []Todo
+			for i := PageSize * page; i < len(todos); i++ {
+				out = append(out, todos[i])
+				if len(out) >= PageSize {
+					break
+				}
+			}
+			e = t.ExecuteTemplate(w, "index.html", map[string]any{
+				"List":      out,
+				"Last":      page - 1,
+				"Page":      page,
+				"Next":      page + 1,
+				"Total":     len(todos),
+				"TotalPage": len(todos) / PageSize,
+			})
 			if e != nil {
 				http.Error(w, e.Error(), 500)
 			}
@@ -84,7 +114,7 @@ func main() {
 		}
 
 		modifiedTag = strconv.FormatInt(time.Now().Unix(), 10)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/?page="+pageStr, http.StatusFound)
 	})
 	println("started at http://localhost:8080")
 	e = http.ListenAndServe(":8080", nil)
