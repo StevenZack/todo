@@ -18,7 +18,7 @@ WORKDIR /root
 COPY --from=builder /go/src/github.com/StevenZack/todo/app .
 RUN upx ./app
 
-FROM scratch
+FROM scratch AS production
 WORKDIR /root/
 COPY --from=minify /root/app . 
 EXPOSE 8080
