@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://supermind.cool/css/app.css">
+    <title>Todos</title>
+</head>
+
+<body>
+    <div class="col">
+        <div class="w maxwsm">
+            <h1>Todos</h1>
+            <hr>
+            <form action="/">
+                <input type="text" name="name">
+                <input type="hidden" name="method" value="post">
+                <input type="submit" value="ADD">
+            </form>
+            <table border="1">
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Created At</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+                {{range .}}
+                <tr>
+                    <td>
+                        {{.Id}}
+                    </td>
+                    <td>
+                        {{.Name}}
+                    </td>
+                    <td>
+                        {{.Age}}
+                    </td>
+                    <td>
+                        {{.CreatedAt}}
+                    </td>
+                    <td>
+                        <details>
+                            <summary>Update</summary>
+                            <form action="/">
+                                <input type="hidden" name="method" value="patch">
+                                <input type="hidden" name="id" value="{{.Id}}">
+                                <div>
+                                    <input type="text" name="name" value="{{.Name}}" placeholder="name">
+                                </div>
+                                <div>
+                                    <input type="number" name="age" value="{{.Age}}" placeholder="age">
+                                </div>
+                                <input type="submit" value="submit">
+                            </form>
+                        </details>
+                    </td>
+                    <td>
+                        <a href="/?method=delete&id={{.Id}}">Delete</a>
+                    </td>
+                </tr>
+                {{end}}
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
