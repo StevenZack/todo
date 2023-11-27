@@ -19,8 +19,9 @@ type Todo struct {
 //go:embed views
 var fs embed.FS
 var (
-	todos     = []Todo{}
-	idCounter = 0
+	todos       = []Todo{}
+	modifiedTag = "-"
+	idCounter   = 0
 )
 
 func init() {
@@ -69,6 +70,12 @@ func main() {
 				}
 			}
 		default:
+			w.Header().Set("ETag", modifiedTag)
+			if modifiedTag == r.Header.Get("If-None-Match") {
+				http.Redirect(w, r, "/", http.StatusNotModified)
+				return
+			}
+
 			e = t.ExecuteTemplate(w, "index.html", todos)
 			if e != nil {
 				http.Error(w, e.Error(), 500)
@@ -76,6 +83,7 @@ func main() {
 			return
 		}
 
+		modifiedTag = strconv.FormatInt(time.Now().Unix(), 10)
 		http.Redirect(w, r, "/", http.StatusFound)
 	})
 	println("started at http://localhost:8080")
