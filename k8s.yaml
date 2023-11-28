@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: todo
-          image:  zigzigcheers/todo:{{tag}}
+          image:  zigzigcheers/todo:{{.Tag}}
           ports:
           - containerPort: 8080
           resources:
