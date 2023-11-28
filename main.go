@@ -96,6 +96,7 @@ func main() {
 		}
 		t.ExecuteTemplate(w, "register.html", nil)
 	})
+
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
@@ -136,6 +137,7 @@ func main() {
 		})
 		t.ExecuteTemplate(w, "login.html", nil)
 	})
+	
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
