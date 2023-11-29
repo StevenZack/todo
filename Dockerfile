@@ -9,14 +9,14 @@ WORKDIR /app/todo
 
 RUN go mod tidy
 
-RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -o main .
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w" -trimpath -o main .
 
 RUN go test -cover -v ./...
 
 FROM zigzigcheers/upx as minify
 WORKDIR /root
 COPY --from=builder /app/todo/main .
-RUN upx ./main
+RUN upx --best --lzma ./main
 
 FROM scratch AS production
 WORKDIR /root/
