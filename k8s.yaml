@@ -23,17 +23,9 @@ spec:
             requests:
               memory: 64Mi
               cpu: '0.5'
-          # env:
-            # - name:  MONGO_USERNAME
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name:  todo-secret
-            #       key: mongo_username
-            # - name:  MONGO_PASSWORD
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name:  todo-secret
-            #       key: mongo_password
+          env:
+            - name:  HELLO
+              value: {{.HELLO}}
             # - name:  MONGO_SERVER
             #   valueFrom:
             #     configMapKeyRef:

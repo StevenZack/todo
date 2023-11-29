@@ -1,10 +1,12 @@
 <nav class="p">
     <a href="/">Todos App</a> |
-    {{if ne . ""}}
-    {{.}}
+    {{if ne .Username ""}}
+    {{.Username}}
     <button onclick="location.pathname='/login'">Logout</button>
     {{else}}
     <a href="/login">Login</a>
     {{end}}
+    |
+    {{.HELLO}}
 </nav>
 <hr>

@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -59,7 +60,10 @@ func main() {
 			}
 		}
 
-		t.ExecuteTemplate(w, "nav.html", username)
+		t.ExecuteTemplate(w, "nav.html", map[string]any{
+			"Username": username,
+			"HELLO":    os.Getenv("HELLO"),
+		})
 	})
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -137,7 +141,7 @@ func main() {
 		})
 		t.ExecuteTemplate(w, "login.html", nil)
 	})
-	
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
