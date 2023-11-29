@@ -26,11 +26,6 @@ spec:
           env:
             - name:  HELLO
               value: {{.HELLO}}
-            # - name:  MONGO_SERVER
-            #   valueFrom:
-            #     configMapKeyRef:
-            #       name:  todo-configmap
-            #       key: mongo_server
 
 ---
 apiVersion: v1
