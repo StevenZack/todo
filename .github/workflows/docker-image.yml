@@ -49,4 +49,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: k8s-cd notifier
-        run: curl {{secrets.K8S_CD_NOTIFIER}} -F tags="${{ steps.meta.outputs.tags }}" -F HELLO="${{ secrets.HELLO }}"
+        run: curl ${{secrets.K8S_CD_NOTIFIER}} -F tags="${{ steps.meta.outputs.tags }}" -F HELLO="${{ secrets.HELLO }}"
